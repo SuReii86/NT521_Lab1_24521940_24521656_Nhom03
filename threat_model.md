@@ -3,8 +3,8 @@
 ## (a) Actor / Role
 | Role | Mục đích gọi hàm | Trường được đọc |
 |---|---|---|
-| VIEWER | Xem tóm tắt sự cố | `issueSummary`, `severity`, `deviceName` |
-| OPERATOR | Vận hành thiết bị | + `ipAddress`, `macAddress`, `serialNumber` |
+| VIEWER | Xem tóm tắt sự cố | `issueSummary`, `severity`, `hostname` |
+| OPERATOR | Vận hành thiết bị | + `managementIpAddress`, `macAddress`, `serialNumber` |
 | ADMIN | Quản trị thiết bị | + `snmpCommunity`, `snmpAuthKey`, `snmpPrivKey`, `password`, `token` |
 | ANONYMOUS / role không hợp lệ | Không có | Không được gọi hàm |
 
@@ -32,10 +32,12 @@ thì mọi caller đều được đối xử như ADMIN, và hàm duyệt vào 
 | T4 | Information Disclosure | Log hoặc lỗi chứa giá trị nhạy cảm |
 
 ## Security Requirements
-- **SR1**: Hệ thống chỉ trả về giá trị của trường X cho các role nằm trong danh sách được phép truy cập trường đó; ngược lại raise `AccessDenied`.
+- **SR1**: Hệ thống chỉ trả về giá trị của trường X cho các role nằm trong danh sách được phép truy cập trường đó; ngược lại trả về danh sách rỗng (theo `policy.py`).
 - **SR2**: Value dạng dict/list phải được lọc đệ quy, loại các trường con mà role không được đọc.
 - **SR3**: Không duyệt vào nhánh có key cha mà role không được phép đọc.
 - **SR4**: Trường chưa khai báo: giá trị đơn mặc định chỉ OPERATOR trở lên (fail-safe), role thấp hơn nhận kết quả rỗng; container vẫn được duyệt nhưng từng trường con bị kiểm tra riêng.
 - **SR5**: Giới hạn độ sâu, số kết quả; phát hiện tham chiếu vòng.
 - **SR6**: Ghi audit log (role, key, số kết quả) nhưng không ghi value.
-- **SR7**: Role mặc định khi không truyền là mức thấp nhất (VIEWER).
+- **SR7**: Role mặc định khi không truyền là mức thấp nhất (viewer). Role không hợp lệ cũng nhận danh sách rỗng.
+
+> Bảng phân quyền (key -> danh sách role được đọc) nằm trong `policy.py`.
